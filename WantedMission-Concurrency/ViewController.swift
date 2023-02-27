@@ -54,7 +54,6 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-
     func imageLoad(_ imageV: UIImageView, url: URL) {
         DispatchQueue.global().async {
             DispatchQueue.main.async {
