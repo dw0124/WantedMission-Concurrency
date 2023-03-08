@@ -9,6 +9,8 @@ import UIKit
 class ViewController: UIViewController {
     
     var imageList: [RandomImage] = []
+    var image: [UIImage] = []
+    
     @IBOutlet weak var tableView: UITableView!
     
     @IBAction func loadAllImageButton(_ sender: UIButton) {
@@ -16,38 +18,10 @@ class ViewController: UIViewController {
             
             let cell = tableView.cellForRow(at: IndexPath(row: i, section: 0)) as? TableViewCell
             
-            cell?.progressBar.progress = 0
-            
-            DispatchQueue.global().async {
-                guard let url = URL(string: (self.imageList[i].download_url)) else {
-                    return
-                }
-                let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                    
-                    if let error = error {
-                        fatalError(error.localizedDescription)
-                        return
-                    }
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now()) {
-                        cell?.photoView?.image = UIImage(systemName: "photo")
-                    }
-                    
-                    if let data = data ,let image = UIImage(data: data) {
-                            DispatchQueue.main.async {
-                                cell?.photoView?.image = image
-                            }
-                    }
-                }
-                task.resume()
-                
-                cell?.observation = task.progress.observe(\.fractionCompleted, options: [.new]) { progress, change in
-                    DispatchQueue.main.async {
-                        print(progress.fractionCompleted)
-                        cell?.progressBar.progress = Float(progress.fractionCompleted)
-                    }
-                }
+            guard let url = URL(string: (self.imageList[i].download_url)) else {
+                return
             }
+            cell?.updatePhoto(with: url)
         }
         tableView.reloadData()
     }
@@ -84,40 +58,14 @@ extension ViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         
-        cell.loadImage = { [weak self] in
+        cell.loadImage = {
             
             cell.progressBar.progress = 0
             
-            DispatchQueue.global().async {
-                guard let url = URL(string: (self?.imageList[indexPath.row].download_url)!) else {
-                    return
-                }
-                let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                    
-                    if let error = error {
-                        fatalError(error.localizedDescription)
-                        return
-                    }
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now()) {
-                        cell.photoView?.image = UIImage(systemName: "photo")
-                    }
-                    
-                    if let data = data ,let image = UIImage(data: data) {
-                            DispatchQueue.main.async {
-                                cell.photoView?.image = image
-                            }
-                    }
-                }
-                task.resume()
-                
-                cell.observation = task.progress.observe(\.fractionCompleted, options: [.new]) { progress, change in
-                    DispatchQueue.main.async {
-                        print(progress.fractionCompleted)
-                        cell.progressBar.progress = Float(progress.fractionCompleted)
-                    }
-                }
+            guard let url = URL(string: (self.imageList[indexPath.row].download_url)) else {
+                return
             }
+            cell.updatePhoto(with: url)
         }
         
         return cell

@@ -9,7 +9,7 @@ import Foundation
 
 class WebService {
     
-    func getData(url: URL, completion: @escaping ([RandomImage]) -> ()) {
+    func getData<T: Decodable>(url: URL, completion: @escaping (T) -> ()) {
         
         let dataTask: URLSessionDataTask = URLSession.shared.dataTask(with: url) { (data:Data? ,response:URLResponse? ,error:Error?) in
             
@@ -22,10 +22,8 @@ class WebService {
             }
             
             do{
-                var apiResponse = try JSONDecoder().decode([RandomImage].self, from: data)
-
+                let apiResponse = try JSONDecoder().decode(T.self, from: data)
                     completion(apiResponse)
-                
             } catch {
                 print(error)
             }

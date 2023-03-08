@@ -27,4 +27,37 @@ class TableViewCell: UITableViewCell {
         loadImage?()
     }
 
+    var task: URLSessionDataTask?
+    
+    func updatePhoto(with url: URL) {
+        progressBar.progress = 0
+        
+        photoView.image = UIImage(systemName: "photo")
+        
+        task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            
+            guard let data = data, let image = UIImage(data: data) else { return }
+            
+            DispatchQueue.main.async {
+                self.photoView.image = image
+                self.task = nil
+            }
+        }
+        
+        task?.resume()
+        
+        observation = task?.progress.observe(\.fractionCompleted, options: [.new]) { progress, change in
+            DispatchQueue.main.async {
+                print(progress.fractionCompleted)
+                self.progressBar.progress = Float(progress.fractionCompleted)
+            }
+        }
+    }
+    
+    
 }
