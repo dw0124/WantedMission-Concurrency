@@ -45,7 +45,7 @@
                                                         <action selector="touchButton:" destination="yEa-Qh-AsM" eventType="touchUpInside" id="HDc-rg-Lgr"/>
                                                     </connections>
                                                 </button>
-                                                <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="DNu-TY-NIc">
+                                                <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DNu-TY-NIc">
                                                     <rect key="frame" x="161" y="86" width="120" height="4"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="120" id="ojY-gF-U4k"/>

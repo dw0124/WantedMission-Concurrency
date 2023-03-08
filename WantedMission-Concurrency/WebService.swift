@@ -23,9 +23,8 @@ class WebService {
             
             do{
                 var apiResponse = try JSONDecoder().decode([RandomImage].self, from: data)
-                DispatchQueue.main.sync {
+
                     completion(apiResponse)
-                }
                 
             } catch {
                 print(error)

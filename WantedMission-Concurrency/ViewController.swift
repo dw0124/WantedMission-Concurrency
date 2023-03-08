@@ -13,20 +13,38 @@ class ViewController: UIViewController {
     
     @IBAction func loadAllImageButton(_ sender: UIButton) {
         for i in 0..<imageList.count {
+            
             let cell = tableView.cellForRow(at: IndexPath(row: i, section: 0)) as? TableViewCell
-            guard let url = URL(string: imageList[i].download_url) else {
-                return
-            }
+            
+            cell?.progressBar.progress = 0
+            
             DispatchQueue.global().async {
-                DispatchQueue.main.asyncAfter(deadline: .now()) {
-                    cell?.photoView?.image = nil
-                    cell?.photoView.image = UIImage(systemName: "photo")
+                guard let url = URL(string: (self.imageList[i].download_url)) else {
+                    return
                 }
-                if let data = try? Data(contentsOf: url) {
-                    if let image = UIImage(data: data) {
-                        DispatchQueue.main.async {
-                            cell?.photoView?.image = image
-                        }
+                let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                    
+                    if let error = error {
+                        fatalError(error.localizedDescription)
+                        return
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+                        cell?.photoView?.image = UIImage(systemName: "photo")
+                    }
+                    
+                    if let data = data ,let image = UIImage(data: data) {
+                            DispatchQueue.main.async {
+                                cell?.photoView?.image = image
+                            }
+                    }
+                }
+                task.resume()
+                
+                cell?.observation = task.progress.observe(\.fractionCompleted, options: [.new]) { progress, change in
+                    DispatchQueue.main.async {
+                        print(progress.fractionCompleted)
+                        cell?.progressBar.progress = Float(progress.fractionCompleted)
                     }
                 }
             }
@@ -43,7 +61,9 @@ class ViewController: UIViewController {
         let url = URL(string: "https://picsum.photos/v2/list?limit=3")
         WebService().getData(url: url!) { [weak self] images in
             self?.imageList = images
-            self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
         }
     }
 
@@ -65,22 +85,53 @@ extension ViewController: UITableViewDataSource {
         }
         
         cell.loadImage = { [weak self] in
-
+            
+            cell.progressBar.progress = 0
+            
             DispatchQueue.global().async {
-                if let url = URL(string: (self?.imageList[indexPath.row].download_url)!) {
-                    DispatchQueue.main.asyncAfter(deadline: .now()+0.1) {
+                guard let url = URL(string: (self?.imageList[indexPath.row].download_url)!) else {
+                    return
+                }
+                let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                    
+                    if let error = error {
+                        fatalError(error.localizedDescription)
+                        return
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
                         cell.photoView?.image = UIImage(systemName: "photo")
                     }
-
-                    if let data = try? Data(contentsOf: url) {
-                        if let image = UIImage(data: data) {
+                    
+                    if let data = data ,let image = UIImage(data: data) {
                             DispatchQueue.main.async {
                                 cell.photoView?.image = image
                             }
-                        }
+                    }
+                }
+                task.resume()
+                
+                cell.observation = task.progress.observe(\.fractionCompleted, options: [.new]) { progress, change in
+                    DispatchQueue.main.async {
+                        print(progress.fractionCompleted)
+                        cell.progressBar.progress = Float(progress.fractionCompleted)
                     }
                 }
             }
+            
+//            self.observation = self.task.progress.observe(\.fractionCompleted,
+//                                                 options: [.new],
+//                                                 changeHandler: { progress, change in
+//                OperationQueue.main.addOperation {
+//                    guard self.workItem.isCancelled == false else {
+//                        self.observation.invalidate()
+//                        self.observation = nil
+//                        self.progressView.progress = 0
+//                        return
+//                    }
+//                    self.progressView.progress = Float(progress.fractionCompleted)
+//                }
+//            })
         }
         
         return cell

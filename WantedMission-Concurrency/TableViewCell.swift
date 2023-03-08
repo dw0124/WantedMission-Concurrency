@@ -10,6 +10,13 @@ import UIKit
 
 class TableViewCell: UITableViewCell {
     
+    var observation: NSKeyValueObservation?
+
+    deinit {
+        observation?.invalidate()
+        observation = nil
+    }
+    
     @IBOutlet weak var photoView: UIImageView!
     @IBOutlet weak var button: UIButton!
     @IBOutlet weak var progressBar: UIProgressView!
