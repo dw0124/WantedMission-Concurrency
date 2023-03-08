@@ -118,20 +118,6 @@ extension ViewController: UITableViewDataSource {
                     }
                 }
             }
-            
-//            self.observation = self.task.progress.observe(\.fractionCompleted,
-//                                                 options: [.new],
-//                                                 changeHandler: { progress, change in
-//                OperationQueue.main.addOperation {
-//                    guard self.workItem.isCancelled == false else {
-//                        self.observation.invalidate()
-//                        self.observation = nil
-//                        self.progressView.progress = 0
-//                        return
-//                    }
-//                    self.progressView.progress = Float(progress.fractionCompleted)
-//                }
-//            })
         }
         
         return cell
